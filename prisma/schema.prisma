@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  users    User[]
+  projects Project[]
+  teams    Team[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("EMPLOYEE")
+  createdAt DateTime @default(now())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  teams       Team[]    @relation("TeamMembers")
+  projects    Project[] @relation("ProjectMembers")
+  headedTeams Team[]    @relation("TeamHead")
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  teamId    String?      // ✅ THIS enables linking to Team
+  team      Team? @relation(fields: [teamId], references: [id])
+
+  members   User[] @relation("ProjectMembers")
+}
+
+
+model Team {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  teamHeadId String?
+  teamHead   User?  @relation("TeamHead", fields: [teamHeadId], references: [id])
+
+  members     User[]        @relation("TeamMembers")
+  invitations Invitation[]
+  projects    Project[]     // ✅ NEW
+}
+
+
+model Invitation {
+  id     String @id @default(uuid())
+  email  String
+  role   String
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+}

@@ -7,7 +7,9 @@ export function middleware(request: NextRequest) {
 
   // Security headers
   const response = NextResponse.next()
-
+  if (request.nextUrl.pathname === "/api/test-db") {
+  return NextResponse.next();
+}
   // Add security headers (but not for server API)
   if (!pathname.startsWith('/api/server')) {
     response.headers.set('X-Frame-Options', 'DENY')
@@ -51,12 +53,14 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+
     /*
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
-}
+};
+          

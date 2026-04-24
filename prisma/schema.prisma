@@ -10,69 +10,57 @@ datasource db {
 
 
 model Company {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  createdAt DateTime @default(now())
-
-  users    User[]
-  projects Project[]
-  teams    Team[]
+  createdAt DateTime  @default(now())
+  projects  Project[]
+  teams     Team[]
+  users     User[]
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  role      String   @default("EMPLOYEE")
-  createdAt DateTime @default(now())
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
-  teams       Team[]    @relation("TeamMembers")
-  projects    Project[] @relation("ProjectMembers")
+  id          String    @id @default(uuid())
+  email       String    @unique
+  name        String?
+  role        String    @default("EMPLOYEE")
+  createdAt   DateTime  @default(now())
+  companyId   String
   headedTeams Team[]    @relation("TeamHead")
+  company     Company   @relation(fields: [companyId], references: [id])
+  projects    Project[] @relation("ProjectMembers")
+  teams       Team[]    @relation("TeamMembers")
 }
 
 model Project {
   id        String   @id @default(uuid())
   name      String
   createdAt DateTime @default(now())
-
   companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
-  teamId    String?      // ✅ THIS enables linking to Team
-  team      Team? @relation(fields: [teamId], references: [id])
-
-  members   User[] @relation("ProjectMembers")
+  teamId    String?
+  team      Team?    @relation(fields: [teamId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
+  members   User[]   @relation("ProjectMembers")
 }
-
 
 model Team {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
-  teamHeadId String?
-  teamHead   User?  @relation("TeamHead", fields: [teamHeadId], references: [id])
-
-  members     User[]        @relation("TeamMembers")
+  id          String       @id @default(uuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  companyId   String
+  teamHeadId  String?
   invitations Invitation[]
-  projects    Project[]     // ✅ NEW
+  projects    Project[]
+  teamHead    User?        @relation("TeamHead", fields: [teamHeadId], references: [id])
+  company     Company      @relation(fields: [companyId], references: [id])
+  members     User[]       @relation("TeamMembers")
 }
 
-
 model Invitation {
-  id     String @id @default(uuid())
-  email  String
-  role   String
-  teamId String
-  team   Team   @relation(fields: [teamId], references: [id])
-
+  id        String   @id @default(uuid())
+  email     String
+  role      String
+  teamId    String
   status    String   @default("PENDING")
   createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id])
 }
